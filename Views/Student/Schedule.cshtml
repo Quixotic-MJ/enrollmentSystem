@@ -1,0 +1,155 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Schedule - Enrollment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <h1 class="text-3xl font-bold mb-4">Your Class Schedule</h1>
+        <p class="text-lg text-gray-700 mb-6">Select the academic year and semester to view your class schedule for your current course.</p>
+
+        <div class="bg-gray-200 p-4 rounded-lg mb-6">
+            <span class="font-medium">Current Course:</span> <span id="currentCourseDisplay" class="font-semibold">Bachelor of Science in Information Technology</span>
+        </div>
+        
+          <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MIS CODE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COURSE CODE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DESCRIPTIVE TITLE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lec</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-IT101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">IT 101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Introduction to Programming</td>
+                                <td class="px-6 py-4 whitespace-nowrap">9:00 AM - 10:30 AM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Mon, Wed</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">RM 101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Prof. Smith</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-MATH202</td>
+                                <td class="px-6 py-4 whitespace-nowrap">MATH 202</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Calculus II</td>
+                                <td class="px-6 py-4 whitespace-nowrap">11:00 AM - 12:30 PM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Tue, Thu</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">RM 205</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Dr. Johnson</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-IT102L</td>
+                                <td class="px-6 py-4 whitespace-nowrap">IT 102L</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Data Structures (Lab)</td>
+                                <td class="px-6 py-4 whitespace-nowrap">1:00 PM - 3:00 PM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Fri</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">1</td>
+                                <td class="px-6 py-4 whitespace-nowrap">LAB 103</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Prof. White</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+        
+
+        <div id="scheduleDisplayArea" class="hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h5 class="text-xl font-semibold mb-4" id="scheduleTermTitle"></h5>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MIS CODE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COURSE CODE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DESCRIPTIVE TITLE</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lec</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-IT101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">IT 101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Introduction to Programming</td>
+                                <td class="px-6 py-4 whitespace-nowrap">9:00 AM - 10:30 AM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Mon, Wed</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">RM 101</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Prof. Smith</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-MATH202</td>
+                                <td class="px-6 py-4 whitespace-nowrap">MATH 202</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Calculus II</td>
+                                <td class="px-6 py-4 whitespace-nowrap">11:00 AM - 12:30 PM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Tue, Thu</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">RM 205</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Dr. Johnson</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">MIS-IT102L</td>
+                                <td class="px-6 py-4 whitespace-nowrap">IT 102L</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Data Structures (Lab)</td>
+                                <td class="px-6 py-4 whitespace-nowrap">1:00 PM - 3:00 PM</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Fri</td>
+                                <td class="px-6 py-4 whitespace-nowrap">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">1</td>
+                                <td class="px-6 py-4 whitespace-nowrap">LAB 103</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Prof. White</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-gray-700 mt-4"><strong>Total Units:</strong> <span id="totalUnitsDisplay"></span></p>
+            </div>
+        </div>
+    </div>
+
+  
+</body>
+</html>

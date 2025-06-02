@@ -1,0 +1,413 @@
+﻿@* @model enrollmentSystem.Models.Student *@
+@{
+Layout = null;
+var student = ViewBag.Student as enrollmentSystem.Models.Student;
+var academicYears = ViewBag.AcademicYears as List<enrollmentSystem.Models.AcademicYear>;
+var programs = ViewBag.Programs as List<enrollmentSystem.Models.AcademicProgram>;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enrollment - Enrollment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+<div class="container mx-auto px-4 py-8 flex-grow">
+    <h1 class="text-3xl font-bold mb-4">Student Enrollment</h1>
+    <p class="text-lg text-gray-700 mb-6">Begin your enrollment process, select subjects, and confirm your course load
+        for the upcoming academic term.</p>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h5 class="text-xl font-semibold mb-4">Student Information</h5>
+
+        <form id="enrollmentForm">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.StudentId" readonly>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="AcademicYear" id="schoolYear">
+                        <option selected disabled>Choose S.Y...</option>
+                        @foreach (var year in academicYears)
+                        {
+                        <option value="@year.Year">@year.Year</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="enrollmentSemester" id="enrollmentSemester">
+                        <option selected disabled>Choose...</option>
+                        <option value="1st Semester">1st Semester</option>
+                        <option value="2nd Semester">2nd Semester</option>
+                        <option value="Summer">Summer</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Student Status</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="studentStatus" id="studentStatus">
+                        <option selected disabled>Choose...</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Irregular">Irregular</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="enrollmentStatus">
+                        <option selected disabled>Choose...</option>
+                        <option value="New">New</option>
+                        <option value="Old">Old</option>
+                        <option value="Transferee">Transferee</option>
+                        <option value="Cross-Enrollee">Cross-Enrollee</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.LastName" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.FirstName" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.MiddleName" readonly>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Home Address</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                       value="@student.HomeAddress" readonly>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.ContactNumber" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                           value="@student.Email" readonly>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="yearLevel" id="yearLevel">
+                        <option selected disabled>Choose...</option>
+                        <option value="1st Year" selected="@(student.YearLevel == "1st Year")">1st Year</option>
+                        <option value="2nd Year" selected="@(student.YearLevel == "2nd Year")">2nd Year</option>
+                        <option value="3rd Year" selected="@(student.YearLevel == "3rd Year")">3rd Year</option>
+                        <option value="4th Year" selected="@(student.YearLevel == "4th Year")">4th Year</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                    <select
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        name="program" id="program">
+                        <option value="" selected disabled>Choose Program...</option>
+                        @foreach (var program in programs)
+                        {
+                        <option value="@program.Name"
+                                selected="@(program.Name == student.Program)">@program.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-200">
+
+            @* <h5 class="text-xl font-semibold mb-2">Subject Selection</h5> *@
+            <button type="button" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mb-4 hidden"
+                    id="selectSubjectsBtn">SELECT SUBJECTS
+            </button>
+
+            <div id="subjectSelectionArea" class="hidden">
+                <h5 class="text-xl font-semibold mb-3">Available Subjects</h5>
+                <div class="mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Day</label>
+                            <select id="dayFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">All Days</option>
+                                <option value="MWF">MWF</option>
+                                <option value="TTH">TTH</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Time</label>
+                            <select id="timeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">All Times</option>
+                                <option value="Morning">Morning (Before 12PM)</option>
+                                <option value="Afternoon">Afternoon (After 12PM)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                COURSE CODE
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                DESCRIPTIVE TITLE
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Units
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Action
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="availableSubjectsTableBody" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+
+                <h6 class="text-lg font-medium mb-2">Selected Subjects</h6>
+                <div class="overflow-x-auto mb-4">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                COURSE CODE
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                DESCRIPTIVE TITLE
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Units
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Action
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="selectedSubjectsTableBody" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-gray-700 mt-3"><strong>Total Units:</strong> <span id="totalUnitsDisplay">0</span></p>
+            </div>
+
+            <div class="mt-6">
+                <button type="button" id="confirmEnrollmentBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md">CONFIRM ENROLLMENT</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const studentStatus = document.getElementById('studentStatus');
+        const selectSubjectsBtn = document.getElementById('selectSubjectsBtn');
+        const subjectSelectionArea = document.getElementById('subjectSelectionArea');
+        const yearLevel = document.getElementById('yearLevel');
+        const program = document.getElementById('program');
+        const confirmEnrollmentBtn = document.getElementById('confirmEnrollmentBtn');
+
+        // Student status change handler
+        studentStatus.addEventListener('change', function () {
+            if (this.value === 'Irregular') {
+                selectSubjectsBtn.classList.remove('hidden');
+            } else {
+                selectSubjectsBtn.classList.add('hidden');
+                subjectSelectionArea.classList.add('hidden');
+            }
+        });
+
+        // Semester change handler
+        document.getElementById('enrollmentSemester').addEventListener('change', function() {
+            if (document.getElementById('studentStatus').value === 'Irregular') {
+                loadAvailableSubjects();
+            }
+        });
+
+        // Select subject button click handler
+        selectSubjectsBtn.addEventListener('click', function () {
+            loadAvailableSubjects();
+            subjectSelectionArea.classList.remove('hidden');
+        });
+
+        // Load available subjects based on year level and program
+        function loadAvailableSubjects() {
+            const selectedYearLevel = yearLevel.value;
+            const selectedProgram = program.value;
+            const selectedSemester = document.getElementById('enrollmentSemester').value;
+
+            fetch(`/Student/GetSubjects?yearLevel=${encodeURIComponent(selectedYearLevel)}&program=${encodeURIComponent(selectedProgram)}&semester=${encodeURIComponent(selectedSemester)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(result => {
+                    const tbody = document.getElementById('availableSubjectsTableBody');
+
+                    if (!result.success || !result.data || result.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No subjects available for this semester</td></tr>';
+                        return;
+                    }
+
+                    // Populate the table with subjects
+                    tbody.innerHTML = result.data.map(subject => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">${subject.code}</td>
+                            <td class="px-6 py-4">${subject.title}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${subject.units}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button type="button" class="text-blue-600 hover:text-blue-900 add-subject-btn" 
+                                        data-code="${subject.code}" 
+                                        data-title="${subject.title}" 
+                                        data-units="${subject.units}">
+                                    Add
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    // Add event listeners to all "Add" buttons
+                    document.querySelectorAll('.add-subject-btn').forEach(button => {
+                        button.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const code = this.getAttribute('data-code');
+                            const title = this.getAttribute('data-title');
+                            const units = this.getAttribute('data-units');
+                            
+                            addSubjectToSelected(code, title, units);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('availableSubjectsTableBody').innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-red-500">
+                                Error loading subjects: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+        
+        // Add subject to selected subjects table
+        function addSubjectToSelected(code, title, units) {
+            const tbody = document.getElementById('selectedSubjectsTableBody');
+
+            // Check if subjects is already selected
+            const existingRow = document.querySelector(`#selectedSubjectsTableBody tr[data-code="${code}"]`);
+            if (existingRow) {
+                alert('This subject is already selected.');
+                return;
+            }
+
+            const row = document.createElement('tr');
+            row.setAttribute('data-code', code);
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${code}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${title}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${units}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button type="button" class="text-red-600 hover:text-red-900 remove-subject-btn">
+                        Remove
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+
+            // Add event listener to the "Remove" button
+            row.querySelector('.remove-subject-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                row.remove();
+                updateTotalUnits();
+            });
+
+            updateTotalUnits();
+        }
+
+        // Update total units display
+        function updateTotalUnits() {
+            const rows = document.querySelectorAll('#selectedSubjectsTableBody tr');
+            let totalUnits = 0;
+
+            rows.forEach(row => {
+                const units = parseInt(row.querySelector('td:nth-child(6)').textContent);
+                totalUnits += units;
+            });
+
+            document.getElementById('totalUnitsDisplay').textContent = totalUnits;
+        }
+
+        // Enrollment confirmation handler
+        confirmEnrollmentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Collect all selected subjects
+            const selectedSubjects = [];
+            document.querySelectorAll('#selectedSubjectsTableBody tr').forEach(row => {
+                selectedSubjects.push({
+                    code: row.getAttribute('data-code'),
+                    title: row.querySelector('td:nth-child(2)').textContent,
+                    units: parseInt(row.querySelector('td:nth-child(6)').textContent)
+                });
+            });
+
+            // In a real application, you would send this data to the server
+            console.log('Form submitted with data:', {
+                academicYear: document.getElementById('schoolYear').value,
+                semester: document.getElementById('enrollmentSemester').value,
+                studentStatus: document.getElementById('studentStatus').value,
+                enrollmentStatus: document.querySelector('select[name="enrollmentStatus"]').value,
+                yearLevel: document.getElementById('yearLevel').value,
+                program: document.getElementById('program').value,
+                subjects: selectedSubjects
+            });
+
+            alert('Enrollment submitted successfully!');
+        });
+    });
+</script>
+</body>
+</html>

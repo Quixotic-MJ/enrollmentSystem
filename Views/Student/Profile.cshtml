@@ -1,0 +1,94 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - Enrollment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<div class="container mx-auto px-4 py-8 flex-grow">
+    <h1 class="text-3xl font-bold mb-4">Your Student Profile</h1>
+    <p class="text-lg text-gray-700 mb-6">Here are your registered details.</p>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
+        <div class="bg-gray-700 text-white px-6 py-4 text-xl font-semibold">
+            Student ID: CTU-2023-0001
+            @* <!-- With model: Student ID: @Model.StudentId --> *@
+        </div>
+        <div class="p-6 space-y-3">
+            <p class="flex items-baseline"><span class="font-medium w-36">Name:</span> Juan Dela Cruz | Santos</p>
+            @* <!-- With model: <p><strong>Name:</strong> @Model.FirstName @Model.LastName | @Model.MiddleName</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Year:</span> 1st Year</p>
+            @* <!-- With model: <p><strong>Year:</strong> @Model.YearLevel</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Semester:</span> 2nd Semester</p>
+            @* <!-- With model: <p><strong>Semester:</strong> @Model.CurrentSemester</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Student Status:</span> Regular</p>
+            @* <!-- With model: <p><strong>Student Status:</strong> @Model.StudentStatus</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Current Course:</span> Bachelor of Science in Information Technology</p>
+            @* <!-- With model: <p><strong>Current Course:</strong> @Model.Course</p> --> *@
+
+            <hr class="my-4 border-gray-200">
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Date of Birth:</span> January 15, 2005 | <span class="font-medium ml-4">Age:</span> 20</p>
+            @* <!-- With model: <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToString("MMMM dd, yyyy") | <strong>Age:</strong> @Model.Age</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Contact Number:</span> +63 9XX XXX XXXX</p>
+            @* <!-- With model: <p><strong>Contact Number:</strong> @Model.ContactNumber</p> --> *@
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Email Address:</span> juan.delacruz@ctu.edu.ph</p>
+            @* <!-- With model: <p><strong>Email Address:</strong> @Model.Email</p> --> *@
+
+            <hr class="my-4 border-gray-200">
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Address:</span> 123 Main Street, Cebu City, Philippines</p>
+            @* <!-- With model: <p><strong>Address:</strong> @Model.Address</p> --> *@
+
+            <hr class="my-4 border-gray-200">
+
+            <p class="flex items-baseline"><span class="font-medium w-36">Date Registered:</span> August 20, 2023</p>
+            @* <!-- With model: <p><strong>Date Registered:</strong> @Model.DateRegistered.ToString("MMMM dd, yyyy")</p> --> *@
+        </div>
+    </div>
+</div>
+
+@* <script> *@
+@*     document.addEventListener('DOMContentLoaded', function() { *@
+@*         // Navigation active link logic *@
+@*         const currentPath = window.location.pathname; *@
+@*         const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1); *@
+@* *@
+@*         const navLinks = document.querySelectorAll('.navbar-nav .nav-link'); *@
+@*         navLinks.forEach(link => { *@
+@*             const linkHref = link.getAttribute('href'); *@
+@*             const linkPage = linkHref.substring(linkHref.lastIndexOf('/') + 1); *@
+@* *@
+@*             if (linkPage.toLowerCase() === currentPage.toLowerCase()) { *@
+@*                 link.classList.add('text-white', 'bg-gray-800'); *@
+@*                 link.setAttribute('aria-current', 'page'); *@
+@*             } else { *@
+@*                 link.classList.remove('text-white', 'bg-gray-800'); *@
+@*                 link.removeAttribute('aria-current'); *@
+@*             } *@
+@*         }); *@
+@*     }); *@
+@* </script> *@
+</body>
+</html>

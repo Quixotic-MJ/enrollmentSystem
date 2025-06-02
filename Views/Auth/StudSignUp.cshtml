@@ -1,0 +1,92 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "Student Sign Up";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white w-full max-w-3xl p-8 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-center mb-6">Student Personal Data</h2>
+
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+        {
+            <div class="bg-red-100 text-red-700 p-4 rounded mb-4 text-center">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        <div class="space-y-4">
+            <div>
+                @Html.Label("studCode", "Student ID Number:", new { @class = "block font-medium mb-1" })
+                @Html.TextBox("studCode", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "number", placeholder = "XXXXXXX", required = "required" })
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    @Html.Label("lastName", "Last Name:", new { @class = "block font-medium mb-1" })
+                    @Html.TextBox("lastName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Last Name", required = "required" })
+                </div>
+                <div>
+                    @Html.Label("firstName", "First Name:", new { @class = "block font-medium mb-1" })
+                    @Html.TextBox("firstName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "First Name", required = "required" })
+                </div>
+                <div>
+                    @Html.Label("middleName", "Middle Name:", new { @class = "block font-medium mb-1" })
+                    @Html.TextBox("middleName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Middle Name" })
+                </div>
+            </div>
+
+            <div>
+                @Html.Label("birthDate", "Date of Birth:", new { @class = "block font-medium mb-1" })
+                @Html.TextBox("birthDate", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "date", required = "required" })
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    @Html.Label("contactNo", "Contact Number:", new { @class = "block font-medium mb-1" })
+                    @Html.TextBox("contactNo", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "tel", placeholder = "Contact Number", required = "required" })
+                </div>
+                <div>
+                    @Html.Label("emailAddress", "Email Address:", new { @class = "block font-medium mb-1" })
+                    @Html.TextBox("emailAddress", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "email", placeholder = "Email Address", required = "required" })
+                </div>
+            </div>
+
+            <div>
+                @Html.Label("address", "Address:", new { @class = "block font-medium mb-1" })
+                @Html.TextBox("address", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Address", required = "required" })
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    @Html.Label("newPassword", "Password:", new { @class = "block font-medium mb-1" })
+                    @Html.Password("newPassword", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Create Password", required = "required" })
+                </div>
+                <div>
+                    @Html.Label("confirmPassword", "Confirm Password:", new { @class = "block font-medium mb-1" })
+                    @Html.Password("confirmPassword", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Confirm Password", required = "required" })
+                </div>
+            </div>
+
+            <button id="btn" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition duration-200">
+                Sign Up
+            </button>
+
+            <p class="text-center mt-4 text-sm">
+                Already have an account?
+                <a href="@Url.Action("Login", "Auth")" class="text-blue-600 hover:underline">Login</a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
