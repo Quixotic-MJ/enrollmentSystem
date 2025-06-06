@@ -21,18 +21,38 @@ namespace enrollmentSystem.Controllers
         }
         
         [HttpPost]
-        public IActionResult LoginStudent(string IDNumber, string Password)
+        public async Task<IActionResult> LoginStudent(string IDNumber, string Password)
         {
-            if (IDNumber == "123456" && Password == "123456")
+            try
             {
-                HttpContext.Session.SetString("StudentID", IDNumber);
-                TempData["message"] = "Login successful!";
-                return RedirectToAction("StudentMenu", "Student");
-            }
+                var student = await _context.Student
+                    .FirstOrDefaultAsync(s => s.Stud_Id == IDNumber);
 
-            ViewBag.ErrorMessage = "Invalid ID number or password.";
-            ViewBag.PreviousIDNumber = IDNumber; // Remember the ID on failed attempt
-            return View("Login");
+                if (student == null)
+                {
+                    ViewBag.ErrorMessage = "Student ID not found. Please register first.";
+                    ViewBag.PreviousIDNumber = IDNumber;
+                    return View("Login");
+                }
+
+                if (student.Stud_Password == Password)
+                {
+                    HttpContext.Session.SetString("StudentID", student.Stud_Id);
+                    HttpContext.Session.SetString("StudentName", $"{student.Stud_Fname} {student.Stud_Lname}");
+            
+                    TempData["SuccessMessage"] = "Login successful!";
+                    return RedirectToAction("StudentMenu", "Student");
+                }
+
+                ViewBag.ErrorMessage = "Invalid password. Please try again.";
+                ViewBag.PreviousIDNumber = IDNumber;
+                return View("Login");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred during login. Please try again.";
+                return View("Login");
+            }
         }
 
 
@@ -45,23 +65,74 @@ namespace enrollmentSystem.Controllers
         
 
         [HttpPost]
-        public IActionResult LoginAdmin(string username, string Password)
+        public async Task<IActionResult> LoginAdmin(string username, string Password)
         {
-            if (username == "admin" && Password == "123456")
+            try
             {
-                // Optional: Store something in session
-                TempData["message"] = "Login successful!";
-                return RedirectToAction("AdminMenu", "Admin");
-            }
+                var admin = await _context.Admin
+                    .FirstOrDefaultAsync(a => a.Admin_Id == username);
 
-            ViewBag.ErrorMessage = "Invalid ID number or password.";
-            return View("Login");
+                if (admin == null)
+                {
+                    ViewBag.ErrorMessage = "Admin ID not found. Please register first.";
+                    return View("LoginAdmin"); 
+                }
+
+                if (admin.Admin_Password == Password)
+                {
+                    HttpContext.Session.SetString("AdminID", admin.Admin_Id);
+                    HttpContext.Session.SetString("AdminName", $"{admin.Admin_Fname} {admin.Admin_Lname}");
+            
+                    TempData["AdminLoginSuccess"] = "Admin login successful!";
+                    return RedirectToAction("AdminMenu", "Admin");
+                }
+
+                ViewBag.ErrorMessage = "Invalid password. Please try again.";
+                return View("LoginAdmin");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred during login. Please try again.";
+                return View("LoginAdmin");
+            }
         }
+
         
+        [HttpGet]
         public IActionResult StudSignUp()
         {
             return View();
         }
+        
+        [HttpPost]
+        public async Task<IActionResult> StudSignUp(Student student)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (await _context.Student.AnyAsync(s => s.Stud_Id == student.Stud_Id))
+                    {
+                        ModelState.AddModelError("Stud_Id", "Student ID already exists");
+                        return View(student);
+                    }
+
+                    _context.Student.Add(student);
+                    await _context.SaveChangesAsync();
+                    
+                    TempData["SuccessMessage"] = "Student created successfully!";
+                    return RedirectToAction("SignUpSuccess");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error saving student: {ex.Message}");
+                Console.WriteLine($"Error: {ex}");
+            }
+
+            return View(student);
+        }
+        
         
         [HttpGet]
         public IActionResult AdminSignUp()
@@ -77,7 +148,6 @@ namespace enrollmentSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // Check if admin exists - using Admin (singular) property
                     var existingAdmin = await _context.Admin.FindAsync(admin.Admin_Id);
                     if (existingAdmin != null)
                     {
@@ -85,7 +155,7 @@ namespace enrollmentSystem.Controllers
                         return View(admin);
                     }
 
-                    _context.Admin.Add(admin); // Using singular Admin
+                    _context.Admin.Add(admin); 
                     await _context.SaveChangesAsync();
             
                     TempData["SuccessMessage"] = "Registration successful!";

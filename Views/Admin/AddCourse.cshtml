@@ -1,123 +1,188 @@
-﻿@{
-    Layout = null;
-    ViewBag.Title = "Add New Program Course - Enrollment System";
+﻿@model enrollmentSystem.Models.AddCourseViewModel
+@{
+Layout = null;
+ViewBag.Title = "Add New Program Course - Enrollment System";
+var showSuccess = TempData["SuccessAdding"] != null;
+var successAdding = TempData["SuccessAdding"]?.ToString();
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Admin Dashboard</title>
+    <title>@ViewBag.Title</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .input-validation-error {
+            border-color: #f56565;
+            background-color: #fff5f5;
+        }
+        .validation-summary-errors {
+            color: #e53e3e;
+            background-color: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+        .field-validation-error {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .required-field::after {
+            content: " *";
+            color: #e53e3e;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-
 <div class="container mx-auto px-4 py-8 flex-grow">
     <h1 class="text-3xl font-bold mb-4">Add New Program Course</h1>
     <p class="text-lg text-gray-700 mb-6">Fill in the details below to add a new course to a program.</p>
 
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <form id="addCourseForm" method="post" data-ajax-url="@Url.Action("AddCourseAjax", "AddProgram")"
-              class="space-y-4">
-            <div id="formMessage"></div>
+        <form method="post" asp-action="AddCourse" asp-controller="Admin" class="space-y-4" id="courseForm">
+            @Html.AntiForgeryToken()
 
-            <!-- Course Category -->
+            <!-- Course Category Dropdown -->
             <div>
-                <label for="courseCategory" class="block text-sm font-medium text-gray-700 mb-1">Course
-                    Category:</label>
-                <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    id="courseCategory" name="Ctg_Code" required>
-                    <option value="" selected disabled>Select Category...</option>
-                    @* @foreach (var category in ViewBag.CourseCategories as List<enrollmentSystem.Models.CourseCategory>) *@
-                    @* { *@
-                    @*     <option value="@category.Ctg_Code">@category.Ctg_Name</option> *@
-                    @* } *@
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Course Category</label>
+                <select asp-for="NewCourse.Ctg_Code" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                    <option value="">-- Select Category --</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                    <option value="@category.Ctg_Code">@category.Ctg_Name</option>
+                    }
                 </select>
+                <span asp-validation-for="NewCourse.Ctg_Code" class="field-validation-error"></span>
             </div>
 
             <!-- Course Code -->
             <div>
-                <label for="courseCode" class="block text-sm font-medium text-gray-700 mb-1">Course Code:</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Course Number</label>
                 <div class="flex">
-                    <span
-                        class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-100 text-gray-500 rounded-l-md"
-                        id="courseCodePrefix">
-                        [Select Category]
+                    <span class="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-100 text-gray-500 rounded-l-md" id="courseCodePrefix">
+                        @(Model.NewCourse.Ctg_Code ?? "[Select Category]")
                     </span>
-                    <input type="text"
-                           class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                           id="courseCode" name="Crs_Code" placeholder="e.g., 101" required>
+                    <input asp-for="NewCourse.Crs_Code" type="text"
+                           class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="e.g., 101" required>
                 </div>
-                <p class="mt-1 text-sm text-gray-500">Full course code will be: <span id="fullCourseCodePreview"
-                                                                                      class="font-medium">[Category][Your Input]</span>
+                <p class="mt-1 text-sm text-gray-500">
+                    Full course code: <span id="fullCourseCodePreview" class="font-medium">
+                        @(Model.NewCourse.Ctg_Code + Model.NewCourse.Crs_Code ?? "[Category][Number]")
+                    </span>
                 </p>
+                <span asp-validation-for="NewCourse.Crs_Code" class="field-validation-error"></span>
             </div>
 
-            <!-- Descriptive Title -->
+            <!-- Course Title -->
             <div>
-                <label for="descriptiveTitle" class="block text-sm font-medium text-gray-700 mb-1">Descriptive
-                    Title:</label>
-                <input type="text"
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Course Title</label>
+                <input asp-for="NewCourse.Crs_Title" type="text"
                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                       id="descriptiveTitle" name="Crs_Title" placeholder="e.g., Introduction to Computing" required>
+                       required>
+                <span asp-validation-for="NewCourse.Crs_Title" class="field-validation-error"></span>
             </div>
 
-            <!-- Prerequisite - Changed to multiple select -->
+            <!-- Prerequisite Course -->
             <div>
-                <label for="prerequisite"
-                       class="block text-sm font-medium text-gray-700 mb-1">Co-/Prerequisites:</label>
-                <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    id="prerequisite" name="Preq_Crs_Code" multiple="multiple">
-                    @* @foreach (var course in ViewBag.CoursesForPrereq as List<enrollmentSystem.Models.Course>) *@
-                    @* { *@
-                    @*     <option value="@course.Crs_Code">@course.Crs_Code - @course.Crs_Title</option> *@
-                    @* } *@
+                <label class="block text-sm font-medium text-gray-700 mb-1">Prerequisite Course</label>
+                <select asp-for="NewCourse.Preq_Crs_Code" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- No Prerequisite --</option>
+                    @foreach (var course in Model.Courses)
+                    {
+                    <option value="@course.Crs_Code">@course.Crs_Code - @course.Crs_Title</option>
+                    }
                 </select>
-                <p class="mt-1 text-sm text-gray-500">Hold Ctrl/Cmd to select multiple or use the search box</p>
             </div>
 
-            <!-- Units -->
+            <!-- Course Units -->
             <div>
-                <label for="numberOfUnits" class="block text-sm font-medium text-gray-700 mb-1">No. of Units:</label>
-                <input type="number"
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Total Units</label>
+                <input asp-for="NewCourse.Crs_Units" type="number" min="1" max="10"
                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                       id="numberOfUnits" name="Crs_Units" min="1" max="6" value="3" required>
+                       required>
+                <span asp-validation-for="NewCourse.Crs_Units" class="field-validation-error"></span>
             </div>
 
-            <!-- Lecture & Lab Units -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="lecUnits" class="block text-sm font-medium text-gray-700 mb-1">Lecture Units:</label>
-                    <input type="number"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                           id="lecUnits" name="Crs_Lec" min="0" value="2" required>
-                </div>
-                <div>
-                    <label for="labUnits" class="block text-sm font-medium text-gray-700 mb-1">Laboratory Units:</label>
-                    <input type="number"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                           id="labUnits" name="Crs_Lab" min="0" value="1" required>
-                </div>
+            <!-- Lecture Hours -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Lecture Hours</label>
+                <input asp-for="NewCourse.Crs_Lec" type="number" min="0" max="10"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       required>
+                <span asp-validation-for="NewCourse.Crs_Lec" class="field-validation-error"></span>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex space-x-3 pt-4">
-                <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Add Course
+            <!-- Lab Hours -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1 required-field">Lab Hours</label>
+                <input asp-for="NewCourse.Crs_Lab" type="number" min="0" max="10"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       required>
+                <span asp-validation-for="NewCourse.Crs_Lab" class="field-validation-error"></span>
+            </div>
+
+            <div class="flex justify-end space-x-4 pt-4">
+                <button type="reset" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors">
+                    Clear Form
                 </button>
-                <button type="button" onclick="history.back()"
-                        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                    Cancel
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Add Course
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categorySelect = document.getElementById('NewCourse_Ctg_Code');
+        const prefixSpan = document.getElementById('courseCodePrefix');
+        const codeInput = document.getElementById('NewCourse_Crs_Code');
+        const previewSpan = document.getElementById('fullCourseCodePreview');
+
+        function updateFullCodePreview() {
+            const prefix = prefixSpan.textContent;
+            const code = codeInput.value || "[Number]";
+            previewSpan.textContent = (prefix === "[Select Category]" ? "" : prefix) + code;
+        }
+
+        if (categorySelect.value) {
+            prefixSpan.textContent = categorySelect.value;
+        }
+
+        updateFullCodePreview();
+
+        categorySelect.addEventListener('change', function () {
+            prefixSpan.textContent = this.value || "[Select Category]";
+            updateFullCodePreview();
+        });
+
+        codeInput.addEventListener('input', updateFullCodePreview);
+
+        // Show SweetAlert only if form was just submitted and succeeded
+        const showSuccess = @showSuccess.ToString().ToLower();
+        if (showSuccess) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '@successAdding',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

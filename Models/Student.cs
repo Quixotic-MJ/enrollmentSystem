@@ -1,17 +1,48 @@
-﻿namespace enrollmentSystem.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace enrollmentSystem.Models
 {
     public class Student
     {
-        public string StudentId { get; set; }
-        public string LastName { get; set; }
-        public string FirstName { get; set; }
-        public string MiddleName { get; set; }
-        public string HomeAddress { get; set; }
-        public string ContactNumber { get; set; }
-        public string Email { get; set; }
+        [Key]
+        [Required(ErrorMessage = "Student ID is required")]
+        public string Stud_Id { get; set; }  
+        
+        [Required(ErrorMessage = "Last name is required")]
+        public string Stud_Lname { get; set; }
+        
+        [Required(ErrorMessage = "First name is required")]
+        public string Stud_Fname { get; set; }
+        
+        public string? Stud_Mname { get; set; } 
+        
+        [Required(ErrorMessage = "Date of birth is required")]
+        public DateOnly Stud_DOB { get; set; }
+        
+        [Required(ErrorMessage = "Contact number is required")]
+        [Phone(ErrorMessage = "Invalid phone number")]
+        public string Stud_Contact { get; set; }
+        
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Stud_Email { get; set; }
+        
+        [Required(ErrorMessage = "Address is required")]
+        public string Stud_Address { get; set; }
+        
+        [Required(ErrorMessage = "Password is required")]
+        [DataType(DataType.Password)]
+        public string Stud_Password { get; set; }
+        
+        
+    }
+
+    public class studentInfo
+    {
         public string YearLevel { get; set; }
         public string Program { get; set; }
     }
+    
 
     public class AcademicYear
     {
@@ -19,11 +50,11 @@
         public string Year { get; set; }
     }
 
-    public class AcademicProgram
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
+    // public class AcademicProgram
+    // {
+    //     public int Id { get; set; }
+    //     public string Name { get; set; }
+    // }
 
     public class Subject
     {

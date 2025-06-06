@@ -35,3 +35,4 @@ C:\Users\JOHN MARK MAGDASAL\RiderProjects\enrollmentSystem\enrollmentSystem\bin\
 C:\Users\JOHN MARK MAGDASAL\RiderProjects\enrollmentSystem\enrollmentSystem\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\JOHN MARK MAGDASAL\RiderProjects\enrollmentSystem\enrollmentSystem\obj\Debug\net8.0\enrollmentSystem.csproj.AssemblyReference.cache
 C:\Users\JOHN MARK MAGDASAL\RiderProjects\enrollmentSystem\enrollmentSystem\obj\Debug\net8.0\enrollme.2CC0A3C4.Up2Date
+C:\Users\JOHN MARK MAGDASAL\RiderProjects\enrollmentSystem\enrollmentSystem\obj\Debug\net8.0\enrollmentSystem.sourcelink.json

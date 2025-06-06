@@ -34,4 +34,6 @@ namespace enrollmentSystem.Models
         [DataType(DataType.Password)]
         public string Admin_Password { get; set; }
     }
+    
+    
 }

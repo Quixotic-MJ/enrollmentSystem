@@ -38,10 +38,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cc2FtcGxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/JOHN MARK MAGDASAL/RiderProjects/enrollmentSystem/enrollmentSystem/Views/Admin/SignUpSuccess.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cU2lnblVwU3VjY2Vzcy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/JOHN MARK MAGDASAL/RiderProjects/enrollmentSystem/enrollmentSystem/Views/Admin/ViewAllSchedule.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld0FsbFNjaGVkdWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -60,6 +56,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/JOHN MARK MAGDASAL/RiderProjects/enrollmentSystem/enrollmentSystem/Views/Auth/LoginAdmin.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxMb2dpbkFkbWluLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/JOHN MARK MAGDASAL/RiderProjects/enrollmentSystem/enrollmentSystem/Views/Auth/SignUpSuccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxTaWduVXBTdWNjZXNzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/JOHN MARK MAGDASAL/RiderProjects/enrollmentSystem/enrollmentSystem/Views/Auth/StudSignUp.cshtml]

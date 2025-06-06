@@ -30,50 +30,50 @@
             
             <div class="space-y-4">
                 <div>
-                    <label asp-for="Admin_Id" class="block font-medium mb-1"></label>
+                    <label asp-for="Admin_Id" class="block font-medium mb-1">Admin ID</label>
                     <input asp-for="Admin_Id" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Admin ID">
                     <span asp-validation-for="Admin_Id" class="text-red-500 text-sm"></span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label asp-for="Admin_Lname" class="block font-medium mb-1"></label>
+                        <label asp-for="Admin_Lname" class="block font-medium mb-1">Last Name</label>
                         <input asp-for="Admin_Lname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Last Name">
                         <span asp-validation-for="Admin_Lname" class="text-red-500 text-sm"></span>
                     </div>
                     <div>
-                        <label asp-for="Admin_Fname" class="block font-medium mb-1"></label>
+                        <label asp-for="Admin_Fname" class="block font-medium mb-1">First Name</label>
                         <input asp-for="Admin_Fname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="First Name">
                         <span asp-validation-for="Admin_Fname" class="text-red-500 text-sm"></span>
                     </div>
                     <div>
-                        <label asp-for="Admin_Mname" class="block font-medium mb-1"></label>
+                        <label asp-for="Admin_Mname" class="block font-medium mb-1">Middle Name</label>
                         <input asp-for="Admin_Mname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Middle Name">
                         <span asp-validation-for="Admin_Mname" class="text-red-500 text-sm"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label asp-for="Admin_DOB" class="block font-medium mb-1"></label>
+                    <label asp-for="Admin_DOB" class="block font-medium mb-1">Date Of Birth</label>
                     <input asp-for="Admin_DOB" type="date" class="w-full border border-gray-300 rounded px-3 py-2">
                     <span asp-validation-for="Admin_DOB" class="text-red-500 text-sm"></span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label asp-for="Admin_Contact" class="block font-medium mb-1"></label>
+                        <label asp-for="Admin_Contact" class="block font-medium mb-1">Contact</label>
                         <input asp-for="Admin_Contact" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Contact Number">
                         <span asp-validation-for="Admin_Contact" class="text-red-500 text-sm"></span>
                     </div>
                     <div>
-                        <label asp-for="Admin_Email" class="block font-medium mb-1"></label>
+                        <label asp-for="Admin_Email" class="block font-medium mb-1">Email</label>
                         <input asp-for="Admin_Email" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Email Address">
                         <span asp-validation-for="Admin_Email" class="text-red-500 text-sm"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label asp-for="Admin_Address" class="block font-medium mb-1"></label>
+                    <label asp-for="Admin_Address" class="block font-medium mb-1">Address</label>
                     <input asp-for="Admin_Address" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Address">
                     <span asp-validation-for="Admin_Address" class="text-red-500 text-sm"></span>
                 </div>
@@ -91,8 +91,12 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition duration-200">
-                    Register
+                    Sign Up
                 </button>
+                <p class="text-center mt-4 text-sm">
+                    Already have an account?
+                    <a href="@Url.Action("LoginAdmin", "Auth")" class="text-blue-600 hover:underline">Login</a>
+                </p>
             </div>
         </form>
     </div>

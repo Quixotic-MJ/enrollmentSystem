@@ -27,19 +27,6 @@
 <div class="bg-white mt-32 p-8 rounded-lg shadow-md w-full max-w-md">
     <h2 class="text-2xl font-semibold text-center mb-6">Admin Login</h2>
 
-    @if (!String.IsNullOrEmpty(ViewBag.ErrorMessage as string))
-    {
-        <div class="bg-red-100 text-red-700 text-center px-4 py-2 mb-4 rounded">
-            @ViewBag.ErrorMessage
-        </div>
-    }
-    @if (!String.IsNullOrEmpty(ViewBag.message as string))
-    {
-        <div class="bg-green-100 text-green-700 text-center px-4 py-2 mb-4 rounded">
-            @ViewBag.message
-        </div>
-    }
-
     <!-- FORM STARTS HERE -->
     <form asp-action="LoginAdmin" asp-controller="Auth" method="post" class="space-y-4">
         @Html.AntiForgeryToken()
@@ -67,5 +54,30 @@
         <a href="@Url.Action("AdminSignUp", "Auth")" class="text-blue-600 hover:underline">Sign Up</a>
     </p>
 </div>
+
+<!-- SweetAlert Script -->
+<script>
+    @if (!String.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+    {
+        <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: '@ViewBag.ErrorMessage'
+            });
+        </text>
+    }
+    else if (!String.IsNullOrEmpty(ViewBag.message as string))
+    {
+        <text>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '@ViewBag.message'
+            });
+        </text>
+    }
+</script>
+
 </body>
 </html>

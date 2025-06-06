@@ -1,4 +1,5 @@
-﻿@{
+﻿@model enrollmentSystem.Models.Student
+@{
     Layout = null;
     ViewBag.Title = "Student Sign Up";
 }
@@ -15,77 +16,89 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
     <div class="bg-white w-full max-w-3xl p-8 rounded-lg shadow-md">
-        <h2 class="text-2xl font-semibold text-center mb-6">Student Personal Data</h2>
+        <h2 class="text-2xl font-semibold text-center mb-6">Student Registration</h2>
 
-        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+        @if (!ViewData.ModelState.IsValid)
         {
-            <div class="bg-red-100 text-red-700 p-4 rounded mb-4 text-center">
-                @ViewBag.ErrorMessage
+            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+                @Html.ValidationSummary()
             </div>
         }
 
-        <div class="space-y-4">
-            <div>
-                @Html.Label("studCode", "Student ID Number:", new { @class = "block font-medium mb-1" })
-                @Html.TextBox("studCode", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "number", placeholder = "XXXXXXX", required = "required" })
+        <form method="post" asp-action="StudSignUp" asp-controller="Auth">
+            @Html.AntiForgeryToken()
+            
+            <div class="space-y-4">
+                <div>
+                    <label asp-for="Stud_Id" class="block font-medium mb-1">Student ID</label>
+                    <input asp-for="Stud_Id" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Student ID">
+                    <span asp-validation-for="Stud_Id" class="text-red-500 text-sm"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="Stud_Lname" class="block font-medium mb-1">Last Name</label>
+                        <input asp-for="Stud_Lname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Last Name">
+                        <span asp-validation-for="Stud_Lname" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Stud_Fname" class="block font-medium mb-1">First Name</label>
+                        <input asp-for="Stud_Fname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="First Name">
+                        <span asp-validation-for="Stud_Fname" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Stud_Mname" class="block font-medium mb-1">Middle Name</label>
+                        <input asp-for="Stud_Mname" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Middle Name">
+                        <span asp-validation-for="Stud_Mname" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Stud_DOB" class="block font-medium mb-1">Date Of Birth</label>
+                    <input asp-for="Stud_DOB" type="date" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <span asp-validation-for="Stud_DOB" class="text-red-500 text-sm"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Stud_Contact" class="block font-medium mb-1">Contact</label>
+                        <input asp-for="Stud_Contact" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Contact Number">
+                        <span asp-validation-for="Stud_Contact" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Stud_Email" class="block font-medium mb-1">Email</label>
+                        <input asp-for="Stud_Email" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Email Address">
+                        <span asp-validation-for="Stud_Email" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Stud_Address" class="block font-medium mb-1">Address</label>
+                    <input asp-for="Stud_Address" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Address">
+                    <span asp-validation-for="Stud_Address" class="text-red-500 text-sm"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="Stud_Password" class="block font-medium mb-1">Password</label>
+                        <input type="password" id="Stud_Password" name="Stud_Password" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Create Password">
+                        <span asp-validation-for="Stud_Password" class="text-red-500 text-sm"></span>
+                    </div>
+                    <div>
+                        <label for="ConfirmPassword" class="block font-medium mb-1">Confirm Password</label>
+                        <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Confirm Password">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition duration-200">
+                    Sign Up
+                </button>
+                <p class="text-center mt-4 text-sm">
+                    Already have an account?
+                    <a href="@Url.Action("Login", "Auth")" class="text-blue-600 hover:underline">Login</a>
+                </p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    @Html.Label("lastName", "Last Name:", new { @class = "block font-medium mb-1" })
-                    @Html.TextBox("lastName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Last Name", required = "required" })
-                </div>
-                <div>
-                    @Html.Label("firstName", "First Name:", new { @class = "block font-medium mb-1" })
-                    @Html.TextBox("firstName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "First Name", required = "required" })
-                </div>
-                <div>
-                    @Html.Label("middleName", "Middle Name:", new { @class = "block font-medium mb-1" })
-                    @Html.TextBox("middleName", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Middle Name" })
-                </div>
-            </div>
-
-            <div>
-                @Html.Label("birthDate", "Date of Birth:", new { @class = "block font-medium mb-1" })
-                @Html.TextBox("birthDate", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "date", required = "required" })
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    @Html.Label("contactNo", "Contact Number:", new { @class = "block font-medium mb-1" })
-                    @Html.TextBox("contactNo", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "tel", placeholder = "Contact Number", required = "required" })
-                </div>
-                <div>
-                    @Html.Label("emailAddress", "Email Address:", new { @class = "block font-medium mb-1" })
-                    @Html.TextBox("emailAddress", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", type = "email", placeholder = "Email Address", required = "required" })
-                </div>
-            </div>
-
-            <div>
-                @Html.Label("address", "Address:", new { @class = "block font-medium mb-1" })
-                @Html.TextBox("address", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Address", required = "required" })
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    @Html.Label("newPassword", "Password:", new { @class = "block font-medium mb-1" })
-                    @Html.Password("newPassword", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Create Password", required = "required" })
-                </div>
-                <div>
-                    @Html.Label("confirmPassword", "Confirm Password:", new { @class = "block font-medium mb-1" })
-                    @Html.Password("confirmPassword", null, new { @class = "w-full border border-gray-300 rounded px-3 py-2", placeholder = "Confirm Password", required = "required" })
-                </div>
-            </div>
-
-            <button id="btn" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition duration-200">
-                Sign Up
-            </button>
-
-            <p class="text-center mt-4 text-sm">
-                Already have an account?
-                <a href="@Url.Action("Login", "Auth")" class="text-blue-600 hover:underline">Login</a>
-            </p>
-        </div>
+        </form>
     </div>
 
 </body>

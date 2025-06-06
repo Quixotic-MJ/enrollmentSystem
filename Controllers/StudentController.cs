@@ -9,15 +9,7 @@ namespace enrollmentSystem.Controllers
         // Mock data for demonstration
         private static Student _currentStudent = new Student
         {
-            StudentId = "2023-0001",
-            LastName = "Doe",
-            FirstName = "John",
-            MiddleName = "Smith",
-            HomeAddress = "123 Main St, Cityville",
-            ContactNumber = "09123456789",
-            Email = "john.doe@example.com",
-            YearLevel = "1st Year",
-            Program = "BS Computer Science"
+         
         };
 
         private static List<AcademicYear> _academicYears = new List<AcademicYear>
@@ -26,12 +18,12 @@ namespace enrollmentSystem.Controllers
             new AcademicYear { Id = 2, Year = "2024-2025" }
         };
 
-        private static List<AcademicProgram> _programs = new List<AcademicProgram>
-        {
-            new AcademicProgram { Id = 1, Name = "BS Computer Science" },
-            new AcademicProgram { Id = 2, Name = "BS Information Technology" },
-            new AcademicProgram { Id = 3, Name = "BS Business Administration" }
-        };
+        // private static List<AcademicProgram> _programs = new List<AcademicProgram>
+        // {
+        //     new AcademicProgram { Id = 1, Name = "BS Computer Science" },
+        //     new AcademicProgram { Id = 2, Name = "BS Information Technology" },
+        //     new AcademicProgram { Id = 3, Name = "BS Business Administration" }
+        // };
         
         private static List<Subject> _sampleSubjects = new List<Subject>
         {
@@ -67,20 +59,7 @@ namespace enrollmentSystem.Controllers
         {
             return View();
         }
-
-        public IActionResult Enrollment()
-        {
-            // Get student ID from session
-            var studentId = HttpContext.Session.GetString("StudentID") ?? "123456789"; // Fallback for testing
-    
-            // Update your student model with the logged-in ID
-            _currentStudent.StudentId = studentId;
-
-            ViewBag.Student = _currentStudent;
-            ViewBag.AcademicYears = _academicYears;
-            ViewBag.Programs = _programs;
-            return View();
-        }
+        
 
         [HttpGet]
         public IActionResult GetSubjects(string yearLevel, string program, string semester)

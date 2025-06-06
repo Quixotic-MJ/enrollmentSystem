@@ -1,10 +1,11 @@
 ﻿@{
-    ViewBag.Title = "Schedule Management";
-    Layout = null;
+ViewBag.Title = "Schedule Management";
+Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,15 +13,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
 
-        &::-webkit-scrollbar {
-            display: none;
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
         }
 
         .validation-error {
@@ -29,105 +40,409 @@
             margin-top: 0.25rem;
         }
 
-        .form-select:invalid, .form-control:invalid {
+        .form-select:invalid,
+        .form-control:invalid {
             border-color: #dc3545;
         }
-        
+
         /* Vue transition styles */
         .modal-enter-active,
         .modal-leave-active {
             transition: opacity 0.3s ease;
         }
-        
+
         .modal-enter-from,
         .modal-leave-to {
             opacity: 0;
         }
-        
+
         .modal-content-enter-active,
         .modal-content-leave-active {
             transition: all 0.3s ease;
         }
-        
+
         .modal-content-enter-from,
         .modal-content-leave-to {
             opacity: 0;
             transform: scale(0.95);
         }
+
+        /* Improved table styles */
+        .schedule-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            width: 14.28%;
+            padding: 0.75rem;
+            vertical-align: top;
+            border: 1px solid #e5e7eb;
+        }
+
+        .schedule-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            text-align: center;
+            color: #334155;
+            position: sticky;
+            top: 0;
+        }
+
+        .schedule-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .schedule-item {
+            font-size: 0.8125rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.375rem;
+            background-color: #f0fdf4;
+            color: #166534;
+            word-break: break-word;
+            border-left: 3px solid #22c55e;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .schedule-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-header {
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-detail {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #475569;
+            font-size: 0.9375rem;
+        }
+
+        .detail-icon {
+            color: #64748b;
+        }
+
+        .edit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #2563eb;
+            font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .edit-btn:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col" id="app">
-<div class="container mx-auto px-4 py-8 flex-grow">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Create Schedule</h1>
-        <button 
-            @@click="showAddScheduleModal = true"
-            class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">
-            Create Course Schedule
-        </button>
-    </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div class="bg-gray-50 rounded-md p-4 mb-6">
-            <!-- Course selector -->
-            <div class="w-full md:w-1/3 mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Course</label>
-                <select
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="courseFilter">
-                    <option value="">All Courses</option>
-                </select>
+<body class="bg-gray-50 min-h-screen flex flex-col" id="app">
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Schedule Management</h1>
+                <p class="text-gray-600">Create and manage class schedules</p>
             </div>
+            <button onclick="addSectionSchedule"
+                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                        clip-rule="evenodd" />
+                </svg>
+                Create Schedule
+            </button>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-blue-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        MIS Code
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        Course Code
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        Course Name
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        Professor
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        Room
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions
-                    </th>
-                </tr>
-                </thead>
-                <tbody id="scheduleTableBody" class="bg-white divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">CS107</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">AP 1</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Multimedia</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Mr. John Smith</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">ST 302</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-2 edit-sched-btn"
-                           @@click="showEditScheduleModal = true">Info</a>
-                        <button class="text-red-600 hover:text-red-900 delete-schedule-btn">Delete</button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="p-5 border-b border-gray-200">
+                <h2 class="font-semibold text-lg text-gray-800">Filter Schedules</h2>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Programs</label>
+                        <select
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            id="courseFilter">
+                            <option value="">All Programs</option>
+                            <option value="CS101">Computer Science</option>
+                            <option value="CS102">BSIT</option>
+                            <option value="CS103">BSIS</option>
+                            <option value="CS104">BSED</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+            <div class="relative overflow-x-auto">
+                <table class="w-full text-sm text-center rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-xl">
+                                Schedules
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b  border-gray-200">
+                            <td class="px-6 py-4">
+                                <div class="p-6">
+                                    <div class="section-header">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h3 class="section-title">Section A - BS Information Technology</h3>
+                                                <div class="section-detail">
+                                                    <div class="detail-item">
+                                                        <svg class="detail-icon h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                        <span>Instructor: <strong>To be assigned</strong></span>
+                                                    </div>
+                                                </div>
+                                                <div class="section-detail">
+                                                    <div class="detail-item">
+                                                        <svg class="semester-icon h-5 w-5" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span>Semester: <strong>1st Semester</strong></span>
+                                                    </div>
+                                                </div>
+                                                <div class="section-detail">
+                                                    <div class="detail-item">
+                                                        <svg class="semester-icon h-5 w-5" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span>Year Level: <strong>1st Year</strong></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <a href="#" class="edit-btn">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path
+                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                </svg>
+                                                Edit Section
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                        <table class="schedule-table w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th class="py-3">Sunday</th>
+                                                    <th class="py-3">Monday</th>
+                                                    <th class="py-3">Tuesday</th>
+                                                    <th class="py-3">Wednesday</th>
+                                                    <th class="py-3">Thursday</th>
+                                                    <th class="py-3">Friday</th>
+                                                    <th class="py-3">Saturday</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Multimedia Systems</div>
+                                                            <div class="text-xs text-gray-600">7:00 AM - 9:00 AM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT Lab 2</div>
+                                                        </div>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">PELEC 1</div>
+                                                            <div class="text-xs text-gray-600">9:00 AM - 12:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT Lab 1</div>
+                                                        </div>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Intro to Programming</div>
+                                                            <div class="text-xs text-gray-600">1:00 PM - 4:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT101</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Sunday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Data Structures</div>
+                                                            <div class="text-xs text-gray-600">8:00 AM - 11:00 AM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT102</div>
+                                                        </div>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Web Development</div>
+                                                            <div class="text-xs text-gray-600">1:00 PM - 4:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT Lab 3</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Monday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Database Systems</div>
+                                                            <div class="text-xs text-gray-600">9:00 AM - 12:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT103</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Tuesday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Operating Systems</div>
+                                                            <div class="text-xs text-gray-600">10:00 AM - 1:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT104</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Wednesday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Networking</div>
+                                                            <div class="text-xs text-gray-600">8:00 AM - 11:00 AM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT Lab 4</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Thursday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Software Engineering</div>
+                                                            <div class="text-xs text-gray-600">1:00 PM - 4:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: IT105</div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Friday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="schedule-item">
+                                                            <div class="font-medium">Capstone Project</div>
+                                                            <div class="text-xs text-gray-600">9:00 AM - 12:00 PM</div>
+                                                            <div class="text-xs mt-1 text-gray-500">Room: Project Lab
+                                                            </div>
+                                                        </div>
+                                                        <div class="schedule-item flex justify-center items-center">
+                                                            <button class="text-3xl text-center"
+                                                                onclick="openAddScheduleModal('Saturday')">+</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+
+
+
         </div>
     </div>
-</div>
 
-<!-- Add Schedule Modal -->
-<transition name="modal">
-    <div v-if="showAddScheduleModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <div v-if="createSectionchedule" class=" fixed inset-0 z-50 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75" @@click="showAddScheduleModal = false"></div>
+                <div class="absolute inset-0 bg-gray-500 opacity-75" v-on:click="showAddScheduleModal = false"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <transition name="modal-content">
@@ -136,370 +451,136 @@
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Schedule</h3>
-                                <form id="addScheduleForm">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Section Schedule</h3>
+                                <form id="addScheduleForm" v-on:submit.prevent="createSchedule">
                                     <div class="grid grid-cols-1 gap-4">
+                                       
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year <span
-                                                                                                                   class="text-red-500">*</span></label>
-                                            <select
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="CourseId" required>
-                                                <option value="">Select Academic Year</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Course
-                                                <span
-                                                    class="text-red-500">*</span></label>
-                                            <select
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="CourseId" required>
-                                                <option value="">Select Course</option>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Program
+                                                <span class="text-red-500">*</span></label>
+                                            <select v-model="newSchedule.curriculumCode"
+                                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    required>
+                                                <option value="">Select Program</option>
+                                                <option v-for="curriculum in curricula" :value="curriculum.curriculumCode">
+                                                    {{ curriculum.programName }}
+                                                </option>
                                             </select>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Section
-                                                <span
-                                                    class="text-red-500">*</span></label>
-                                            <select
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="RoomId" required>
+                                                <span class="text-red-500">*</span></label>
+                                            <select v-model="newSchedule.section"
+                                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    required>
                                                 <option value="">Select Section</option>
+                                                <option value="A (Day)">A (Day)</option>
+                                                <option value="B (Day)">B (Day)</option>
+                                                <option value="1 (Night)">1 (Night)</option>
+                                                <option value="2 (Night)">2 (Night)</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Room
-                                                <span
-                                                    class="text-red-500">*</span></label>
-                                            <select
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="RoomId" required>
-                                                <option value="">Select Room</option>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester
+                                                <span class="text-red-500">*</span></label>
+                                            <select v-model="newSchedule.section"
+                                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    required>
+                                                <option value="">Select Semester</option>
+                                                <option value="">1st Semester</option>
+                                                <option value="">2nd Semester</option>
+                                                <option value="">Summer</option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Instructor
-                                                <span
-                                                    class="text-red-500">*</span></label>
-                                            <input
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="RoomId" placeholder="Instructor">
+                                       <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Year Level
+                                                <span class="text-red-500">*</span></label>
+                                            <select v-model="newSchedule.section"
+                                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    required>
+                                                <option value="">Select Year Level</option>
+                                                <option value="">1st Year</option>
+                                                <option value="">2nd Year</option>
+                                                <option value="">3rd Year</option>
+                                                <option value="">4th Year</option>
+                                            </select>
                                         </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                        <button type="submit"
+                                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Save
+                                        </button>
+                                        <button type="button"
+                                                v-on:click="showAddScheduleModal = false"
+                                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Cancel
+                                        </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button
-                            @@click="showAddScheduleModal = false"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Save
-                        </button>
-                        <button
-                            @@click="showAddScheduleModal = false"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
-                    </div>
                 </div>
             </transition>
         </div>
-    </div>
-</transition>
+    </div> 
 
-<!-- Edit Schedule Modal -->
-<transition name="modal">
-    <div v-if="showEditScheduleModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75" @@click="showEditScheduleModal = false"></div>
+
+    <!-- Add Schedule Modal -->
+    <div id="addScheduleModal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="text-lg font-semibold text-gray-900">Add Schedule for <span id="modalDayTitle">Monday</span></h3>
+                <button onclick="closeAddScheduleModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <transition name="modal-content">
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Schedule</h3>
-
-                                <div class="mb-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <strong class="text-gray-700">Course:</strong> 
-                                            <span id="scheduleCourseName" class="text-gray-900">Sample Course</span>
-                                        </div>
-                                        <div>
-                                            <strong class="text-gray-700">Total Weekly Hours:</strong>
-                                            <span id="scheduleTotalHours" class="text-gray-900">0</span>h /
-                                            <span id="scheduleCourseUnits" class="text-gray-900">0</span> units
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-blue-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                Session #
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                Day
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                Start
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                End
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                Duration
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">1</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">Monday</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">09:00 AM</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">11:00 AM</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">2h</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <button class="text-blue-600 hover:text-blue-900 mr-2" @@click="showEditSessionModal = true">Edit</button>
-                                                <button class="text-red-600 hover:text-red-900">Delete</button>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+            <div class="modal-body">
+                <form id="scheduleForm">
+                    <input type="hidden" id="selectedDay" value="">
+                    <div class="mb-4">
+                        <label for="course" class="block text-sm font-medium text-gray-700 mb-1">Course</label>
+                        <select id="course" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            <option value="">Select Course</option>
+                            <option value="CS101">CS101 - Intro to Programming</option>
+                            <option value="CS102">CS102 - Data Structures</option>
+                            <option value="CS103">CS103 - Database Systems</option>
+                            <option value="CS104">CS104 - Web Development</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                            <input type="time" id="startTime" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                            <input type="time" id="endTime" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button
-                            @@click="showEditScheduleModal = false"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Save
-                        </button>
-                        <button
-                            @@click="showAddSessionModal = true"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Add Session
-                        </button>
-                        <button
-                            @@click="showEditScheduleModal = false"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
+                    <div class="mb-4">
+                        <label for="room" class="block text-sm font-medium text-gray-700 mb-1">Room</label>
+                        <input type="text" id="room" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="IT101" required>
                     </div>
-                </div>
-            </transition>
-        </div>
-    </div>
-</transition>
-
-<!-- Add Session Modal -->
-<transition name="modal">
-    <div v-if="showAddSessionModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75" @@click="showAddSessionModal = false"></div>
+                    <div class="mb-4">
+                        <label for="instructor" class="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
+                        <input type="text" id="instructor" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="John Doe">
+                    </div>
+                </form>
             </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <transition name="modal-content">
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
-                    <form id="addSessionForm" data-action="/Schedule/AddSession" method="post">
-                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start">
-                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add Session</h3>
-
-                                    <div class="mb-4">
-                                        <div class="bg-blue-50 p-3 rounded-md mb-4" id="sessionInfo">
-                                            <p class="text-sm text-gray-700"><strong>Course:</strong> <span
-                                                    id="sessionCourseName" class="font-medium">Sample Course</span></p>
-                                            <p class="text-sm text-gray-700"><strong>Remaining Hours:</strong> <span
-                                                    id="remainingHours" class="font-medium">0</span>h</p>
-                                        </div>
-                                    </div>
-
-                                    <input type="hidden" name="SchdId" value=""/>
-
-                                    <div class="grid grid-cols-1 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Day <span
-                                                    class="text-red-500">*</span></label>
-                                            <select
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                name="TslDay" required>
-                                                <option value="">Select Day</option>
-                                                <option value="1">Monday</option>
-                                                <option value="2">Tuesday</option>
-                                                <option value="3">Wednesday</option>
-                                                <option value="4">Thursday</option>
-                                                <option value="5">Friday</option>
-                                                <option value="6">Saturday</option>
-                                                <option value="0">Sunday</option>
-                                            </select>
-                                            <div class="validation-error" id="dayError"></div>
-                                        </div>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time <span
-                                                        class="text-red-500">*</span></label>
-                                                <input type="time" name="TslStartTime"
-                                                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                       required min="07:00" max="21:00"/>
-                                                <div class="validation-error" id="startTimeError"></div>
-                                            </div>
-
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">End Time <span
-                                                        class="text-red-500">*</span></label>
-                                                <input type="time" name="TslEndTime"
-                                                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                       required min="08:00" max="22:00"/>
-                                                <div class="validation-error" id="endTimeError"></div>
-                                            </div>
-                                        </div>
-
-                                        <div class="text-xs text-gray-500">
-                                            <p>Session hours: 7:00 AM - 10:00 PM</p>
-                                            <p>Duration: 1-4 hours per session</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                            <button type="submit" id="saveSessionBtn"
-                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                                Add Session
-                            </button>
-                            <button type="button"
-                                    @@click="showAddSessionModal = false"
-                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </transition>
-        </div>
-    </div>
-</transition>
-
-<!-- Edit Session Modal -->
-<transition name="modal">
-    <div v-if="showEditSessionModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75" @@click="showEditSessionModal = false"></div>
+            <div class="modal-footer">
+                <button onclick="closeAddScheduleModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                <button onclick="saveSchedule()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Schedule</button>
             </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <transition name="modal-content">
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
-                    <form id="editSessionForm">
-                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start">
-                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Session</h3>
-
-                                    <!-- Hidden Fields -->
-                                    <input type="hidden" name="SsnId"/>
-                                    <input type="hidden" name="SchdId"/>
-
-                                    <!-- Day Selection -->
-                                    <div class="mb-4">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Day <span
-                                                class="text-red-500">*</span></label>
-                                        <select
-                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            name="TslDay" required>
-                                            <option value="">Select Day</option>
-                                            <option value="0">Sunday</option>
-                                            <option value="1">Monday</option>
-                                            <option value="2">Tuesday</option>
-                                            <option value="3">Wednesday</option>
-                                            <option value="4">Thursday</option>
-                                            <option value="5">Friday</option>
-                                            <option value="6">Saturday</option>
-                                        </select>
-                                        <div class="validation-error text-red-500" id="tsldayError"></div>
-                                    </div>
-
-                                    <!-- Time Inputs -->
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Time <span
-                                                    class="text-red-500">*</span></label>
-                                            <input type="time" name="TslStartTime"
-                                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                   required min="07:00" max="21:00"/>
-                                            <div class="validation-error text-red-500" id="tslstarttimeError"></div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">End Time <span
-                                                    class="text-red-500">*</span></label>
-                                            <input type="time" name="TslEndTime"
-                                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                   required min="08:00" max="22:00"/>
-                                            <div class="validation-error text-red-500" id="tslendtimeError"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-xs text-gray-500">
-                                        <p>Allowed time range: 7:00 AM - 10:00 PM</p>
-                                        <p>Duration: 1–4 hours per session</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                            <button type="submit" id="saveEditedSessionBtn"
-                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                                Save Changes
-                            </button>
-                            <button type="button"
-                                    @@click="showEditSessionModal = false"
-                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </transition>
         </div>
     </div>
-</transition>
 
-<script>
-    const { createApp, ref } = Vue;
 
-    createApp({
-        setup() {
-            const showAddScheduleModal = ref(false);
-            const showEditScheduleModal = ref(false);
-            const showAddSessionModal = ref(false);
-            const showEditSessionModal = ref(false);
 
-            return {
-                showAddScheduleModal,
-                showEditScheduleModal,
-                showAddSessionModal,
-                showEditSessionModal,
-            };
-        }
-    }).mount('#app');
-</script>
+    
 </body>
+
 </html>
