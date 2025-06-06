@@ -24,19 +24,23 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Test database connection
+// Apply database migrations and ensure database is created
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.EnsureCreated();
-        Console.WriteLine("Database connection successful!");
+        
+        // Apply any pending migrations
+        context.Database.Migrate();
+        
+        Console.WriteLine("Database connection and migration successful!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Database connection failed: {ex.Message}");
+        Console.WriteLine($"Database initialization failed: {ex.Message}");
+        throw; // Re-throw to fail fast
     }
 }
 

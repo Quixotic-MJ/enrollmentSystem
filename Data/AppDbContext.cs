@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using enrollmentSystem.Models;
 
 namespace enrollmentSystem.Data
@@ -26,7 +26,25 @@ namespace enrollmentSystem.Data
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Admin>().ToTable("admins");
+            // Configure Admin entity
+            modelBuilder.Entity<Admin>(entity =>
+            {
+                entity.ToTable("admins");
+                entity.Property(e => e.Admin_Id).HasColumnName("admin_id");
+                entity.Property(e => e.Admin_Lname).HasColumnName("admin_lname");
+                entity.Property(e => e.Admin_Fname).HasColumnName("admin_fname");
+                entity.Property(e => e.Admin_Mname).HasColumnName("admin_mname");
+                entity.Property(e => e.Admin_DOB)
+                    .HasColumnName("admin_dob")
+                    .HasColumnType("date")
+                    .HasConversion(
+                        d => d.ToDateTime(TimeOnly.MinValue),
+                        d => DateOnly.FromDateTime(d));
+                entity.Property(e => e.Admin_Contact).HasColumnName("admin_contact");
+                entity.Property(e => e.Admin_Email).HasColumnName("admin_email");
+                entity.Property(e => e.Admin_Address).HasColumnName("admin_address");
+                entity.Property(e => e.Admin_Password).HasColumnName("admin_password");
+            });
             
             // Configure CourseCategory
             modelBuilder.Entity<CourseCategory>(entity =>
@@ -40,30 +58,59 @@ namespace enrollmentSystem.Data
             // Configure Section entity
             modelBuilder.Entity<Section>(entity =>
             {
-                entity.ToTable("sections");
-                entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.CurriculumCode).HasColumnName("curriculum_code");
-                entity.Property(e => e.SectionName).HasColumnName("section_name");
-                entity.Property(e => e.Semester).HasColumnName("semester");
-                entity.Property(e => e.YearLevel).HasColumnName("year_level");
-                entity.Property(e => e.Instructor).HasColumnName("instructor");
+                entity.ToTable("section");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");  // Maps to 'id' column in section table
+
+                entity.Property(e => e.CurriculumCode)
+                    .HasColumnName("curriculum_code");
+    
+                entity.Property(e => e.SectionName)
+                    .HasColumnName("section_name");
+    
+                entity.Property(e => e.Semester)
+                    .HasColumnName("semester");
+    
+                entity.Property(e => e.YearLevel)
+                    .HasColumnName("year_level");
+    
+                entity.Property(e => e.Instructor)
+                    .HasColumnName("instructor");
+
+                // Relationship configuration
+                entity.HasMany(s => s.Schedules)
+                    .WithOne(s => s.Section)
+                    .HasForeignKey(s => s.SectionId)  // Refers to Schedule.SectionId property
+                    .OnDelete(DeleteBehavior.Cascade);
             });
-            
+
             modelBuilder.Entity<Schedule>(entity =>
             {
                 entity.ToTable("schedules");
-                entity.Property(e => e.Id).HasColumnName("id");
-                entity.Property(e => e.SectionId).HasColumnName("section_id");
-                entity.Property(e => e.CurriculumCode).HasColumnName("curriculum_code");
-                entity.Property(e => e.CourseCode).HasColumnName("course_code");
-                entity.Property(e => e.Section).HasColumnName("section");
-                entity.Property(e => e.Room).HasColumnName("room");
-                entity.Property(e => e.Instructor).HasColumnName("instructor");
+    
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
+    
+                // THIS IS THE CRITICAL FIX:
+                entity.Property(e => e.SectionId)
+                    .HasColumnName("section_id");  // Explicitly maps to 'section_id' column in schedules table
+    
+                entity.Property(e => e.CurriculumCode)
+                    .HasColumnName("curriculum_code");
+    
+                entity.Property(e => e.CourseCode)
+                    .HasColumnName("course_code");
+    
+                entity.Property(e => e.Room)
+                    .HasColumnName("room");
+    
+                entity.Property(e => e.Instructor)
+                    .HasColumnName("instructor");
             });
-
+            
             modelBuilder.Entity<ScheduleSession>(entity =>
             {
-                entity.ToTable("schedule_sessions");
+                entity.ToTable("schedulesession");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.ScheduleId).HasColumnName("schedule_id");
                 entity.Property(e => e.DayOfWeek).HasColumnName("day_of_week");
@@ -120,6 +167,15 @@ namespace enrollmentSystem.Data
                     .HasConversion(
                         d => d.ToDateTime(TimeOnly.MinValue),
                         d => DateOnly.FromDateTime(d));
+            });
+
+            // Configure AcademicProgram if it exists
+            modelBuilder.Entity<AcademicProgram>(entity =>
+            {
+                entity.ToTable("academic_programs");
+                entity.Property(e => e.ProgramCode).HasColumnName("program_code");
+                entity.Property(e => e.ProgramName).HasColumnName("program_name");
+                entity.Property(e => e.Description).HasColumnName("description");
             });
         }
     }

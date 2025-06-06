@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using enrollmentSystem.Controllers;
 
@@ -44,6 +44,9 @@ namespace enrollmentSystem.Models
 
         [Column("instructor")]
         public string Instructor { get; set; }
+
+        // Navigation property for schedules
+        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
     }
 
     // In Models/Course.cs
@@ -109,7 +112,10 @@ namespace enrollmentSystem.Models
 
         [Required]
         [Column("section_id")]
-        public string SectionId { get; set; }
+        public int SectionId { get; set; }
+        
+        [ForeignKey("SectionId")]
+        public Section Section { get; set; }
         
         [Required]
         [Column("curriculum_code")]
@@ -125,9 +131,7 @@ namespace enrollmentSystem.Models
         [ForeignKey("CourseCode")]
         public Course Course { get; set; }
 
-        [Required]
-        [Column("section")]
-        public string Section { get; set; }
+       
 
         [Column("room")]
         public string Room { get; set; }

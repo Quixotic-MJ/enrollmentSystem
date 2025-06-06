@@ -1,9 +1,10 @@
-﻿using enrollmentSystem.Data;
+using enrollmentSystem.Data;
 using enrollmentSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,35 +13,71 @@ namespace enrollmentSystem.Controllers
     public class AdminController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(AppDbContext context)
+        public AdminController(AppDbContext context, ILogger<AdminController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         #region Section Management
         [HttpGet]
-        public async Task<IActionResult> GetSections(string curriculumCode, string semester, string yearLevel)
+        public async Task<IActionResult> GetSections(string curriculumCode = null, string semester = null, string yearLevel = null)
         {
-            var sections = await _context.Sections
-                .Where(s => s.CurriculumCode == curriculumCode &&
-                           (string.IsNullOrEmpty(semester) || s.Semester == semester) &&
-                           (string.IsNullOrEmpty(yearLevel) || s.YearLevel == yearLevel))
-                .Join(_context.Curricula,
-                    s => s.CurriculumCode,
-                    c => c.CurriculumCode,
-                    (s, c) => new {
+            try
+            {
+                var query = _context.Sections.AsQueryable();
+
+                // Apply filters if provided
+                if (!string.IsNullOrEmpty(curriculumCode))
+                    query = query.Where(s => s.CurriculumCode == curriculumCode);
+                
+                if (!string.IsNullOrEmpty(semester))
+                    query = query.Where(s => s.Semester == semester);
+                
+                if (!string.IsNullOrEmpty(yearLevel))
+                    query = query.Where(s => s.YearLevel == yearLevel);
+
+                var sections = await query
+                    .Include(s => s.Curriculum)
+                    .Include(s => s.Schedules)
+                        .ThenInclude(sc => sc.Course)
+                    .Include(s => s.Schedules)
+                        .ThenInclude(sc => sc.Sessions)
+                    .Select(s => new 
+                    {
                         id = s.Id,
                         curriculumCode = s.CurriculumCode,
-                        programName = c.Program,
-                        section = s.SectionName,
+                        programName = s.Curriculum.Program,
+                        sectionName = s.SectionName,
                         semester = s.Semester,
                         yearLevel = s.YearLevel,
-                        instructor = s.Instructor
+                        instructor = s.Instructor,
+                        schedules = s.Schedules.Select(sc => new 
+                        {
+                            id = sc.Id,
+                            courseCode = sc.CourseCode,
+                            courseName = sc.Course != null ? sc.Course.Crs_Title : "N/A",
+                            room = sc.Room,
+                            instructor = sc.Instructor,
+                            sessions = sc.Sessions.Select(sess => new 
+                            {
+                                day = sess.DayOfWeek,
+                                startTime = sess.StartTime,
+                                endTime = sess.EndTime
+                            }).ToList()
+                        }).ToList()
                     })
-                .ToListAsync();
+                    .ToListAsync();
 
-            return Json(sections);
+                return Json(sections);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching sections");
+                return StatusCode(500, new { message = "An error occurred while fetching sections." });
+            }
         }
 
         [HttpPost]
@@ -51,7 +88,7 @@ namespace enrollmentSystem.Controllers
                 var section = new Section
                 {
                     CurriculumCode = model.CurriculumCode,
-                    SectionName = model.Section,
+                    SectionName = model.SectionName,
                     Semester = model.Semester,
                     YearLevel = model.YearLevel,
                     Instructor = "To be assigned"
@@ -92,7 +129,7 @@ namespace enrollmentSystem.Controllers
                     return Json(new { success = false, message = "Section not found" });
                 }
 
-                section.SectionName = model.Section;
+                section.SectionName = model.SectionName;
                 section.Semester = model.Semester;
                 section.YearLevel = model.YearLevel;
 
@@ -130,9 +167,9 @@ namespace enrollmentSystem.Controllers
                     return Json(new { success = false, message = "Section not found" });
                 }
 
-                // First delete all schedules for this section - comparing int to int
+                // First delete all schedules for this section
                 var schedules = await _context.Schedules
-                    .Where(s => s.SectionId == id.ToString()) // Convert int to string if SectionId is string
+                    .Where(s => s.SectionId == id)
                     .ToListAsync();
 
                 if (schedules.Any())
@@ -154,10 +191,10 @@ namespace enrollmentSystem.Controllers
 
         #region Schedule Management
         [HttpGet]
-        public async Task<IActionResult> GetSchedules(int sectionId) // Changed parameter type from string to int
+        public async Task<IActionResult> GetSchedules(int sectionId)
         {
             var schedules = await _context.Schedules
-                .Where(s => s.SectionId == sectionId.ToString()) // Convert int to string for comparison
+                .Where(s => s.SectionId == sectionId)
                 .Include(s => s.Sessions)
                 .Include(s => s.Course)
                 .Select(s => new {
@@ -342,21 +379,30 @@ namespace enrollmentSystem.Controllers
         {
             try
             {
-                var session = await _context.ScheduleSessions.FindAsync(id);
+                // First find the session to be deleted
+                var session = await _context.ScheduleSessions
+                    .Include(s => s.Schedule) // Include the Schedule navigation property
+                    .FirstOrDefaultAsync(s => s.Id == id);
+                    
                 if (session == null)
                 {
                     return Json(new { success = false, message = "Schedule session not found" });
                 }
 
+                // Get the schedule ID before deleting the session
+                var scheduleId = session.ScheduleId;
+                
+                // Remove the session
                 _context.ScheduleSessions.Remove(session);
                 
                 // Check if this was the last session for the schedule
                 var hasOtherSessions = await _context.ScheduleSessions
-                    .AnyAsync(ss => ss.ScheduleId == session.ScheduleId);
+                    .AnyAsync(ss => ss.ScheduleId == scheduleId);
                 
+                // If no more sessions, delete the schedule as well
                 if (!hasOtherSessions)
                 {
-                    var schedule = await _context.Schedules.FindAsync(session.ScheduleId); 
+                    var schedule = await _context.Schedules.FindAsync(scheduleId);
                     if (schedule != null)
                     {
                         _context.Schedules.Remove(schedule);
@@ -706,12 +752,7 @@ namespace enrollmentSystem.Controllers
             public string AcademicYear { get; set; }
         }
 
-        // public class AddCourseViewModel
-        // {
-        //     public List<CourseCategory> Categories { get; set; } = new List<CourseCategory>();
-        //     public List<CourseDropdownItem> Courses { get; set; } = new List<CourseDropdownItem>();
-        //     public Course NewCourse { get; set; } = new Course();
-        // }
+     
 
         public class CourseDropdownItem
         {
@@ -724,7 +765,7 @@ namespace enrollmentSystem.Controllers
         {
             public string CurriculumCode { get; set; }
             public string CourseCode { get; set; }
-            public string SectionId { get; set; }
+            public int SectionId { get; set; }
             public string Room { get; set; }
             public string Instructor { get; set; }
             public int DayOfWeek { get; set; }
@@ -734,9 +775,18 @@ namespace enrollmentSystem.Controllers
 
         public class SectionCreateModel
         {
+            [Required]
             public string CurriculumCode { get; set; }
-            public string Section { get; set; }
+            
+            [Required]
+            [Display(Name = "Section")]
+            public string SectionName { get; set; }
+            
+            [Required]
             public string Semester { get; set; }
+            
+            [Required]
+            [Display(Name = "Year Level")]
             public string YearLevel { get; set; }
         }
         #endregion
