@@ -109,16 +109,16 @@ namespace enrollmentSystem.Controllers
                     {
                         id = s.Id,
                         curriculumCode = s.CurriculumCode,
-                        programName = s.Curriculum.Program,
+                        programName = s.Curriculum != null ? s.Curriculum.Program : "N/A (Curriculum Missing)",
                         sectionName = s.SectionName,
                         semester = s.Semester,
                         yearLevel = s.YearLevel,
                         instructor = s.Instructor,
                         curriculum = new 
                         {
-                            code = s.Curriculum.CurriculumCode,
-                            program = s.Curriculum.Program,
-                            academicYear = s.Curriculum.AcademicYear,
+                            code = s.Curriculum != null ? s.Curriculum.CurriculumCode : "N/A",
+                            program = s.Curriculum != null ? s.Curriculum.Program : "N/A",
+                            academicYear = s.Curriculum != null ? s.Curriculum.AcademicYear : "N/A",
                             courses = _context.Courses
                                 .Select(c => new 
                                 {
@@ -232,35 +232,44 @@ namespace enrollmentSystem.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("Admin/DeleteSection/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSection(int id)
         {
             try
             {
-                var section = await _context.Sections.FindAsync(id);
+                var section = await _context.Sections
+                    .Include(s => s.Schedules)
+                        .ThenInclude(sch => sch.Sessions) // Eagerly load schedules and their sessions
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
                 if (section == null)
                 {
-                    return Json(new { success = false, message = "Section not found" });
+                    return NotFound(new { message = "Section not found." });
                 }
 
-                // First delete all schedules for this section
-                var schedules = await _context.Schedules
-                    .Where(s => s.SectionId == id)
-                    .ToListAsync();
-
-                if (schedules.Any())
+                // Iterate over a copy of schedules for safe removal
+                foreach (var schedule in section.Schedules.ToList())
                 {
-                    _context.Schedules.RemoveRange(schedules);
+                    // Remove all sessions associated with this schedule
+                    if (schedule.Sessions.Any())
+                    {
+                        _context.ScheduleSessions.RemoveRange(schedule.Sessions);
+                    }
+                    // Remove the schedule itself
+                    _context.Schedules.Remove(schedule);
                 }
 
+                // Finally, remove the section
                 _context.Sections.Remove(section);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true });
+                return Ok(new { message = "Section and all associated schedules and sessions deleted successfully." });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                _logger.LogError(ex, $"Error deleting section with ID {id}.");
+                return StatusCode(500, new { message = "An error occurred while deleting the section: " + ex.Message });
             }
         }
         #endregion

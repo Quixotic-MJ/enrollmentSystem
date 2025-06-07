@@ -327,7 +327,7 @@ Layout = null;
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </button>
-                                                <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50" title="Delete Section">
+                                                <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50" title="Delete Section" v-on:click="confirmDeleteSection(section)">
                                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -627,6 +627,11 @@ Layout = null;
                 const selectedSection = ref(null);
                 const currentActionInfo = ref({ type: null, id: null });
                 
+                // Filter refs
+                const filterCurriculumCode = ref('');
+                const filterSemester = ref('');
+                const filterYearLevel = ref('');
+
                 const newSection = ref({
                     curriculumCode: '',
                     sectionName: '',
@@ -658,6 +663,11 @@ Layout = null;
                        isLoading.value = false;
                    }
                };
+
+                // Apply filters and fetch sections
+                const applyFilters = async () => {
+                    await fetchSections(filterCurriculumCode.value, filterSemester.value, filterYearLevel.value);
+                };
 
                 // Fetch sections from the API
                 const fetchSections = async (curriculumCode = '', semester = '', yearLevel = '') => {
@@ -753,18 +763,39 @@ Layout = null;
 
                 // Open add schedule item modal
                 const openAddScheduleItemModal = (section) => {
-                    error.value = null;
-                    selectedSection.value = section;
-                    newScheduleItem.value = {
+                    console.log('[Vue Debug] openAddScheduleItemModal CALLED. Section Argument:', section, 'Type of section:', typeof section);
+                    console.log('[Vue Debug] --- Current state BEFORE opening modal ---');
+                    console.log('[Vue Debug] error.value:', error.value);
+                    console.log('[Vue Debug] showAddScheduleItemModal.value:', showAddScheduleItemModal.value);
+                    console.log('[Vue Debug] selectedSection.value:', selectedSection.value);
+                    console.log('[Vue Debug] newScheduleItem.value:', JSON.parse(JSON.stringify(newScheduleItem.value))); // Deep copy for logging
+
+                    if (typeof section === 'undefined' || section === null || typeof section.id === 'undefined') {
+                        console.error('[Vue Debug] CRITICAL: openAddScheduleItemModal called with invalid or missing section argument!', section);
+                        error.value = 'Cannot open modal: Section data is missing. Please try refreshing.';
+                        // DO NOT open the modal if section is invalid
+                        return; 
+                    }
+
+                    error.value = null; // Clear any previous errors specifically for this modal
+                    selectedSection.value = section; // Store the section for which we're adding an item
+                    newScheduleItem.value = { // Reset/initialize the form fields
                         sectionId: section.id,
+                        curriculumCode: section.curriculumCode, // Pre-fill if available
                         day: '',
                         startTime: '',
                         endTime: '',
-                        courseId: '',
+                        courseId: '', 
                         room: '',
-                        instructor: 'To be assigned'
+                        instructor: section.instructor || 'To be assigned' // Pre-fill instructor if available from section
                     };
-                    showAddScheduleItemModal.value = true;
+                    showAddScheduleItemModal.value = true; // This is the line that opens the modal
+
+                    console.log('[Vue Debug] --- State AFTER attempting to open modal ---');
+                    console.log('[Vue Debug] error.value:', error.value);
+                    console.log('[Vue Debug] showAddScheduleItemModal.value:', showAddScheduleItemModal.value);
+                    console.log('[Vue Debug] selectedSection.value:', selectedSection.value);
+                    console.log('[Vue Debug] newScheduleItem.value:', JSON.parse(JSON.stringify(newScheduleItem.value))); // Deep copy for logging
                 };
                 
                 // Close add schedule item modal
@@ -823,6 +854,52 @@ Layout = null;
                         } catch (err) {
                             console.error('Error deleting schedule item:', err);
                             error.value = err.message || 'Failed to delete schedule item. Please try again.';
+                        } finally {
+                            isLoading.value = false;
+                            currentActionInfo.value = { type: null, id: null };
+                        }
+                    }
+                };
+
+                // Confirm delete section
+                const confirmDeleteSection = async (section) => {
+                    if (confirm(`Are you sure you want to delete the section "${section.sectionName}"? This will also delete all its schedule items.`)) {
+                        currentActionInfo.value = { type: 'delete-section', id: section.id }; // For specific loading if needed
+                        try {
+                            isLoading.value = true;
+                            error.value = null;
+
+                            const tokenInput = document.querySelector('#globalAntiForgeryTokenForm input[name="__RequestVerificationToken"]');
+                            const token = tokenInput ? tokenInput.value : null;
+
+                            if (!token) {
+                                throw new Error('Security token not found. Please refresh the page and try again.');
+                            }
+
+                            const response = await fetch(`/Admin/DeleteSection/${section.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'RequestVerificationToken': token,
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+
+                            if (!response.ok) {
+                                let errorData;
+                                try {
+                                    errorData = await response.json().catch(() => ({}));
+                                } catch (e) {
+                                    // If response is not JSON, use status text
+                                    throw new Error(response.statusText || 'Failed to delete section. Server returned an error.');
+                                }
+                                throw new Error(errorData.message || 'Failed to delete section');
+                            }
+
+                            alert('Section deleted successfully!');
+                            await fetchSections(filterCurriculumCode.value, filterSemester.value, filterYearLevel.value); // Refresh sections list using current filters
+                        } catch (err) {
+                            console.error('Error deleting section:', err);
+                            error.value = err.message || 'Failed to delete section. Please try again.';
                         } finally {
                             isLoading.value = false;
                             currentActionInfo.value = { type: null, id: null };
@@ -1003,14 +1080,45 @@ Layout = null;
 
                 // Initialize the component
                 onMounted(async () => {
+                    console.log('[Vue Debug] onMounted: Starting. Initial error.value:', error.value, 'Initial showAddScheduleItemModal.value:', showAddScheduleItemModal.value);
                     try {
-                        await Promise.all([
-                            fetchCurricula(),
-                            fetchSections() // Fetch with empty parameters to get all sections initially
-                        ]);
-                    } catch (error) {
-                        console.error('Error in onMounted:', error);
-                        error.value = 'Failed to initialize data. Please refresh the page.';
+                        isLoading.value = true; // Ensure loading is true at the start
+                        error.value = null; // Clear previous errors
+                        console.log('[Vue Debug] onMounted: Cleared error.value. Now:', error.value);
+
+                        console.log("onMounted: Fetching curricula...");
+                        await fetchCurricula();
+                        console.log("onMounted: Fetched curricula successfully. error.value is now:", error.value);
+
+                        console.log("onMounted: Fetching sections with filters - Curriculum:", filterCurriculumCode.value, ", Semester:", filterSemester.value, ", YearLevel:", filterYearLevel.value);
+                        await fetchSections(filterCurriculumCode.value, filterSemester.value, filterYearLevel.value);
+                        console.log("onMounted: Fetched sections successfully. error.value is now:", error.value);
+
+                    } catch (err) {
+                        console.error("Error during initial data fetch in onMounted:", err);
+                        let detailedMessage = err.message || "Unknown error";
+                        if (err.isAxiosError && err.response) { // Handling Axios-like error structure
+                            console.error("Error response status:", err.response.status);
+                            console.error("Error response data:", err.response.data);
+                            detailedMessage += ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data).substring(0,200)})`;
+                        } else if (err.response && typeof err.response.text === 'function') { // Handling fetch API Response object
+                             try {
+                                const errorText = await err.response.text();
+                                console.error("Error response status:", err.response.status);
+                                console.error("Error response text:", errorText);
+                                detailedMessage += ` (Status: ${err.response.status}, Response: ${errorText.substring(0, 200)})`;
+                            } catch (e) {
+                                console.error("Could not get error response text:", e);
+                                if(err.response.status) detailedMessage += ` (Status: ${err.response.status})`;
+                            }
+                        } else if (err.response && err.response.status) { // Fallback for other response-like errors
+                             detailedMessage += ` (Status: ${err.response.status})`;
+                        }
+                        error.value = "Failed to load initial page data. " + detailedMessage;
+                        console.log('[Vue Debug] onMounted: error.value SET in catch block:', error.value);
+                    } finally {
+                        isLoading.value = false;
+                        console.log("onMounted: finished initial data fetch attempt. Final error.value:", error.value, "Final showAddScheduleItemModal.value:", showAddScheduleItemModal.value);
                     }
                 });
 
@@ -1030,9 +1138,15 @@ Layout = null;
                     saveScheduleItem,
                     editScheduleItem,
                     confirmDeleteScheduleItem,
+                    confirmDeleteSection,
                     formatTime,
+                    formatTimeFromTimespan,
                     getDayName,
-                    currentActionInfo
+                    currentActionInfo,
+                    filterCurriculumCode, // Expose filter refs
+                    filterSemester,
+                    filterYearLevel,
+                    applyFilters // Expose applyFilters function
                 };
             }
         }).mount('#app');
