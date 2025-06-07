@@ -234,15 +234,35 @@ Layout = null;
                 <h2 class="font-semibold text-lg text-gray-800">Filter Schedules</h2>
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Programs</label>
-                        <select
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            id="courseFilter">
+                        <label for="filterCurriculumCode" class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                        <select id="filterCurriculumCode" v-model="filterCurriculumCode" v-on:change="applyFilters"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">All Programs</option>
-                            <option value="CS101">Computer Science</option>
-                            <option value="CS102">BSIT</option>
-                            <option value="CS103">BSIS</option>
-                            <option value="CS104">BSED</option>
+                            <option v-for="curriculum in curricula" :key="curriculum.curriculumCode" :value="curriculum.curriculumCode">
+                                {{ curriculum.program }} ({{ curriculum.curriculumCode }})
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterSemester" class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                        <select id="filterSemester" v-model="filterSemester" v-on:change="applyFilters"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">All Semesters</option>
+                            <option value="1st Semester">First Semester</option>
+                            <option value="2nd Semester">Second Semester</option>
+                            <option value="Summer">Summer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterYearLevel" class="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+                        <select id="filterYearLevel" v-model="filterYearLevel" v-on:change="applyFilters"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">All Year Levels</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                            <option value="5th Year">5th Year</option> <!-- If applicable -->
                         </select>
                     </div>
                 </div>

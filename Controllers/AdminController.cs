@@ -91,13 +91,13 @@ namespace enrollmentSystem.Controllers
 
                 // Apply filters if provided
                 if (!string.IsNullOrEmpty(curriculumCode))
-                    query = query.Where(s => s.CurriculumCode == curriculumCode);
+                    query = query.Where(s => s.CurriculumCode != null && s.CurriculumCode.ToUpper() == curriculumCode.ToUpper());
                 
                 if (!string.IsNullOrEmpty(semester))
-                    query = query.Where(s => s.Semester == semester);
+                    query = query.Where(s => s.Semester != null && s.Semester.ToUpper() == semester.ToUpper());
                 
                 if (!string.IsNullOrEmpty(yearLevel))
-                    query = query.Where(s => s.YearLevel == yearLevel);
+                    query = query.Where(s => s.YearLevel != null && s.YearLevel.ToUpper() == yearLevel.ToUpper());
 
                 var sections = await query
                     .Include(s => s.Curriculum)
