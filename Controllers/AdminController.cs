@@ -21,6 +21,66 @@ namespace enrollmentSystem.Controllers
             _logger = logger;
         }
 
+        #region Schedule Management
+
+        
+        
+        [HttpDelete("Admin/DeleteScheduleItem/{id}")]
+        public async Task<IActionResult> DeleteScheduleItem(int id)
+        {
+            try
+            {
+                // First find the session to be deleted
+                var session = await _context.ScheduleSessions
+                    .Include(s => s.Schedule)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+                    
+                if (session == null)
+                {
+                    return NotFound(new { success = false, message = "Schedule session not found." });
+                }
+
+                // Get the schedule ID before deleting the session
+                var scheduleId = session.ScheduleId;
+                
+                // Remove the session
+                _context.ScheduleSessions.Remove(session);
+                
+                // Check if this was the last session for the schedule
+                var hasOtherSessions = await _context.ScheduleSessions
+                    .AnyAsync(ss => ss.ScheduleId == scheduleId);
+                
+                // If no more sessions, delete the schedule as well
+                if (!hasOtherSessions)
+                {
+                    var schedule = await _context.Schedules.FindAsync(scheduleId);
+                    if (schedule != null)
+                    {
+                        _context.Schedules.Remove(schedule);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Schedule item deleted successfully.",
+                    scheduleId = scheduleId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting schedule item");
+                return StatusCode(500, new { 
+                    success = false, 
+                    message = "An error occurred while deleting the schedule item.",
+                    error = ex.Message
+                });
+            }
+        }
+        
+        #endregion
+        
         #region Section Management
         [HttpGet]
         public async Task<IActionResult> GetSections(string curriculumCode = null, string semester = null, string yearLevel = null)
@@ -54,6 +114,21 @@ namespace enrollmentSystem.Controllers
                         semester = s.Semester,
                         yearLevel = s.YearLevel,
                         instructor = s.Instructor,
+                        curriculum = new 
+                        {
+                            code = s.Curriculum.CurriculumCode,
+                            program = s.Curriculum.Program,
+                            academicYear = s.Curriculum.AcademicYear,
+                            courses = _context.Courses
+                                .Select(c => new 
+                                {
+                                    id = c.Crs_Code,
+                                    code = c.Crs_Code,
+                                    name = c.Crs_Title
+                                })
+                                .OrderBy(c => c.code)
+                                .ToList()
+                        },
                         schedules = s.Schedules.Select(sc => new 
                         {
                             id = sc.Id,
@@ -65,7 +140,8 @@ namespace enrollmentSystem.Controllers
                             {
                                 day = sess.DayOfWeek,
                                 startTime = sess.StartTime,
-                                endTime = sess.EndTime
+                                endTime = sess.EndTime,
+                                id = sess.Id
                             }).ToList()
                         }).ToList()
                     })
@@ -243,9 +319,61 @@ namespace enrollmentSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSchedule([FromBody] ScheduleCreateModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                _logger.LogError($"CreateSchedule: Model validation failed. Errors: {string.Join(", ", errors)}");
+                return BadRequest(new { success = false, message = "Validation failed", errors });
+            }
+
             try
             {
-                // First, check if a schedule already exists for this course and section
+                if (model == null)
+                {
+                    _logger.LogError("CreateSchedule: Model is null");
+                    return BadRequest(new { success = false, message = "Invalid request data" });
+                }
+
+                _logger.LogInformation($"CreateSchedule called with model: {System.Text.Json.JsonSerializer.Serialize(model)}");
+                
+                // Validate model properties
+                if (model.SectionId <= 0)
+                {
+                    _logger.LogError($"Invalid SectionId: {model.SectionId}");
+                    return Json(new { success = false, message = "Invalid section ID" });
+                }
+
+                if (string.IsNullOrEmpty(model.CurriculumCode))
+                {
+                    _logger.LogError("CurriculumCode is null or empty");
+                    return Json(new { success = false, message = "Curriculum code is required" });
+                }
+
+                // First, verify the section exists
+                var section = await _context.Sections.FindAsync(model.SectionId);
+                if (section == null)
+                {
+                    _logger.LogError($"Section not found with ID: {model.SectionId}");
+                    return Json(new { success = false, message = "Section not found" });
+                }
+
+                // Validate required fields
+                if (string.IsNullOrEmpty(model.CourseCode))
+                {
+                    _logger.LogError("CourseCode is required");
+                    return Json(new { success = false, message = "Course code is required" });
+                }
+
+                if (model.DayOfWeek < 0 || model.DayOfWeek > 6)
+                {
+                    _logger.LogError($"Invalid DayOfWeek: {model.DayOfWeek}");
+                    return Json(new { success = false, message = "Invalid day of week" });
+                }
+
+                // Check if a schedule already exists for this course and section
                 var existingSchedule = await _context.Schedules
                     .FirstOrDefaultAsync(s => 
                         s.SectionId == model.SectionId && 
@@ -253,37 +381,50 @@ namespace enrollmentSystem.Controllers
 
                 if (existingSchedule == null)
                 {
+                    _logger.LogInformation("Creating new schedule");
+
+                    // Validate times
+                    if (!TimeSpan.TryParse(model.StartTime, out var startTime) || 
+                        !TimeSpan.TryParse(model.EndTime, out var endTime))
+                    {
+                        _logger.LogError($"Invalid time format. Start: {model.StartTime}, End: {model.EndTime}");
+                        return Json(new { success = false, message = "Invalid time format. Use HH:mm" });
+                    }
+
                     // Create new schedule
                     var schedule = new Schedule
                     {
-                        CurriculumCode = model.CurriculumCode,
+                        CurriculumCode = model.CurriculumCode ?? string.Empty,
                         CourseCode = model.CourseCode,
                         SectionId = model.SectionId,
-                        Room = model.Room,
-                        Instructor = model.Instructor
+                        Room = model.Room ?? string.Empty,
+                        Instructor = model.Instructor ?? "TBA"
                     };
 
                     _context.Schedules.Add(schedule);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Created new schedule with ID: {schedule.Id}");
 
-                    // Add the session - Fix: Use schedule.SectionId (string) instead of converting to int
+                    // Add the session
                     var session = new ScheduleSession
                     {
-                        ScheduleId = schedule.Id, // Use the actual Schedule ID
+                        ScheduleId = schedule.Id,
                         DayOfWeek = model.DayOfWeek,
-                        StartTime = TimeSpan.Parse(model.StartTime),
-                        EndTime = TimeSpan.Parse(model.EndTime)
+                        StartTime = startTime,
+                        EndTime = endTime
                     };
 
                     _context.ScheduleSessions.Add(session);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Created new session with ID: {session.Id}");
 
+                    var course = await _context.Courses.FindAsync(schedule.CourseCode);
                     return Json(new { 
                         success = true, 
                         id = session.Id,
                         schedule = new {
                             courseCode = schedule.CourseCode,
-                            courseTitle = (await _context.Courses.FindAsync(schedule.CourseCode))?.Crs_Title,
+                            courseTitle = course?.Crs_Title ?? "Unknown Course",
                             instructor = schedule.Instructor,
                             room = schedule.Room,
                             dayOfWeek = session.DayOfWeek,
@@ -532,16 +673,17 @@ namespace enrollmentSystem.Controllers
                     p => p.ProgramCode,
                     (c, p) => new {
                         curriculumCode = c.CurriculumCode,
-                        programCode = c.Program,
-                        programName = p.ProgramName,
+                        programCode = c.Program,  // The code
+                        program = p.ProgramName,   // The full name
                         academicYear = c.AcademicYear
                     })
-                .OrderBy(c => c.programName)
+                .OrderBy(c => c.program)
                 .ThenBy(c => c.academicYear)
                 .ToListAsync();
 
             return Json(curricula);
         }
+        
         #endregion
 
         #region Curriculum Course Methods
@@ -763,13 +905,31 @@ namespace enrollmentSystem.Controllers
 
         public class ScheduleCreateModel
         {
+            [Required(ErrorMessage = "Curriculum code is required")]
             public string CurriculumCode { get; set; }
+            
+            [Required(ErrorMessage = "Course code is required")]
             public string CourseCode { get; set; }
+            
+            [Required(ErrorMessage = "Section ID is required")]
             public int SectionId { get; set; }
+            
+            [Required(ErrorMessage = "Room is required")]
             public string Room { get; set; }
+            
+            [Required(ErrorMessage = "Instructor is required")]
             public string Instructor { get; set; }
+            
+            [Required(ErrorMessage = "Day of week is required")]
+            [Range(0, 6, ErrorMessage = "Day of week must be between 0 (Sunday) and 6 (Saturday)")]
             public int DayOfWeek { get; set; }
+            
+            [Required(ErrorMessage = "Start time is required")]
+            [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Invalid time format. Use HH:mm (24-hour format)")]
             public string StartTime { get; set; }
+            
+            [Required(ErrorMessage = "End time is required")]
+            [RegularExpression(@"^([01]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Invalid time format. Use HH:mm (24-hour format)")]
             public string EndTime { get; set; }
         }
 

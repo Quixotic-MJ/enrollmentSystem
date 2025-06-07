@@ -1,4 +1,4 @@
-﻿using enrollmentSystem.Data;
+using enrollmentSystem.Data;
 using enrollmentSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
